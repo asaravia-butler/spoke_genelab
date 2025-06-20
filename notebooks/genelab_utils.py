@@ -180,7 +180,6 @@ def filter_by_technology_type(metadata, technology_types):
 
 def filter_by_organism(metadata, taxids):
     metadata = metadata[metadata["taxonomy"].isin(taxids)].copy()
-    #metadata["organism"] = metadata["taxonomy"].map(lambda x: taxids.get(x))
     metadata["organism"] = metadata["taxonomy"].map(taxids)
     return metadata
 
@@ -202,6 +201,7 @@ def download_data_files(assays, file_types, filters, reset=False):
 
         if file_type:
             url = os.path.join(DATASET_URL, identifier, "files")
+
             try:
                 response = requests.get(url, allow_redirects=True, timeout=10)
                 response.raise_for_status()
@@ -330,6 +330,7 @@ def extract_metadata(accession, taxonomy, organism):
       - space_program
       - project_type
       - project_title
+      - description
 
     Returns a dict with those keys (values will be None if the field is missing).
     """
@@ -343,6 +344,8 @@ def extract_metadata(accession, taxonomy, organism):
 
     # Metadata block
     meta = ds.get("metadata", {})
+    # print(f"----- {accession} -----")
+    # print(json.dumps(meta, indent=2))
 
     # Progam info
     flight_program = meta.get("flight program", "")
@@ -351,6 +354,7 @@ def extract_metadata(accession, taxonomy, organism):
     project_title = meta.get("project title", "")
     # Join project titles if there are multiple
     project_title = ", ".join(to_list(project_title))
+    description = meta.get("study description", "")
 
     # Mission info
     mission = meta.get("mission", {})
@@ -369,6 +373,7 @@ def extract_metadata(accession, taxonomy, organism):
             "identifier": accession,
             "project_type": project_type,
             "project_title": project_title,
+            "description": description,
             "taxonomy": taxonomy,
             "organism": organism,
             "flight_program": flight_program,
@@ -390,7 +395,7 @@ def extract_gene_info(manifest):
         if os.path.exists(file_path):
             df = pd.read_csv(
                 file_path,
-                usecols=["ENTREZID", "GENENAME"],
+                usecols=["ENTREZID", "SYMBOL", "GENENAME"],
                 dtype=str,
                 keep_default_na=False,
             )
@@ -402,8 +407,8 @@ def extract_gene_info(manifest):
     mgenes.drop_duplicates(subset="ENTREZID", inplace=True)
 
     # Match names of properties in metagraph
-    mgenes = mgenes[["ENTREZID", "GENENAME", "organism", "taxonomy"]]
-    mgenes.rename(columns={"ENTREZID": "identifier", "GENENAME": "name"}, inplace=True)
+    mgenes = mgenes[["ENTREZID", "SYMBOL", "GENENAME", "organism", "taxonomy"]]
+    mgenes.rename(columns={"ENTREZID": "identifier", "SYMBOL": "symbol", "GENENAME": "name"}, inplace=True)
 
     # Remove version number
     mgenes["identifier"] = mgenes.identifier.apply(lambda x: x.split(".")[0])

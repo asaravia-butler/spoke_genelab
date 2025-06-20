@@ -1,0 +1,13 @@
+property,type,description,example
+identifier,string,Unique assay identifier combining GeneLab dataset accession and MD5 hash of metadata (links assay to dataset and ensures version integrity),GLDS-401-ec55d3e698d289f2afd663725127
+name,string,Human-readable assay title detailing the biological measurement performed,transcription profiling – RNA Sequencing (RNA‑Seq)
+technology,string,"Platform or method used to generate assay data (e.g., sequencing platform, mass spectrometry, imaging)",RNA Sequencing
+measurement,string,"Type of data produced by the assay, describing the focus of the analysis",transcriptional profiling
+factors_1,string[],"Primary experimental factor(s) applied at the assay level (independent variables intentionally varied by the investigator); often corresponds to study-level design (e.g., Ground Control). Additional factors (e.g., dose, time point, sex, strain) may also be included.",Ground Control
+factors_2,string[],"Secondary experimental factor(s) for this assay—typically the comparative group(s) in analysis—connecting this assay to differential conditions (e.g., Space Flight).",Space Flight
+material_1,string,"Biological material analyzed in the first assay group (e.g., tissue, cell type, organ)",Quadriceps femoris
+material_2,string,"Biological material analyzed in the second assay group (e.g., tissue, cell type, organ)",Gastrocnemius
+material_name_1,string,"Preferred ontology-based name for the first material (e.g., UBERON term)",Quadriceps femoris
+material_name_2,string,"Preferred ontology-based name for the second material (e.g., UBERON term)",Gastrocnemius
+material_id_1,string,"Controlled ontology identifier for the first material (e.g., UBERON code)",UBERON:0001377
+material_id_2,string,"Controlled ontology identifier for the second material (e.g., UBERON code)", UBERON:0001388
