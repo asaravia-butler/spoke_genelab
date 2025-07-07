@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 API_ROOT = "https://visualization.osdr.nasa.gov/biodata/api/v2/"
 DATASET_URL = f"{API_ROOT}dataset/"
 DATASET_PATH = "../data"  # data download directory
+PRIMARY_FACTORS = ["Space Flight", "Ground Control", "Basal Control", "Vivarium Control"]
 
 
 def setup_environment():
@@ -416,6 +417,18 @@ def extract_gene_info(manifest):
     return mgenes
 
 
+
+def extract_space_factor(factors_list):
+    """
+    Given a list of factors, return the first one
+    that is in PRIMARY_FACTORS, or "" if no match.
+    """
+    for f in factors_list:
+        if f in PRIMARY_FACTORS:
+            return f
+    return ""
+
+
 def extract_assay_info(manifest, variables):
     manifest["factors"] = manifest.apply(
         get_factor_data,
@@ -425,6 +438,10 @@ def extract_assay_info(manifest, variables):
     # Put each pair of factors into a separate row and split it into 3 columns
     assays = manifest.explode("factors")
     assays["factors"], assays["factors_1"], assays["factors_2"] = zip(*assays["factors"])
+
+    # Extract the factor_space that distinguishes space flight from other ground conditions
+    assays["factor_space_1"] = assays["factors_1"].apply(extract_space_factor)
+    assays["factor_space_2"] = assays["factors_2"].apply(extract_space_factor)
 
     return assays
 
