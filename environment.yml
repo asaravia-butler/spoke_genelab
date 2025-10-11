@@ -19,7 +19,7 @@ dependencies:
   - papermill
   - monotonic=1.5
   - python-dotenv=1.0.0
-  - openjdk=17.0.8
+  - openjdk=23.0.2
   - ipycytoscape
   - inflection
   - pip
