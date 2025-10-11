@@ -10,7 +10,7 @@ This repository contains the code and metadata needed to build a **Knowledge Gra
 - **Incremental update** for new datasets
 - **Statistical filtering** of results for significance
 - **Species selection** via a configurable whitelist
-- **Versioned metadata** for reproducibility (v0.0.3)
+- **Versioned metadata** for reproducibility (v0.0.4)
 - **Federated query** using Neo4j Fabric with the [Scalable Precision Medicine Open Knowledge Engine (SPOKE) KG](https://spoke.ucsf.edu/)
 
 ---
@@ -39,11 +39,11 @@ This repository contains the code and metadata needed to build a **Knowledge Gra
 
 ## 🕸️ Graph Schema
 
-![Simplified Graph Schema](docs/spoke-genelab-v0.0.3-simplified.png)
+![Simplified Graph Schema](docs/spoke-genelab-v0.0.4-simplified.png)
 
 **Figure**: Schematic overview of the GeneLab knowledge graph structure, highlighting key node types (circles) and relationships (arrows).
 
-The `Assay–MEASURED–MGene` relationship encodes Log₂ fold changes derived from transcription profiling assays, while the `Assay–MEASURED–MethylationRegion` relationship captures methylation differences identified through DNA methylation assays. The `MGene–METHYLATED_IN–MethylationRegion` relationship links model organism genes (`MGene`) to 1,000 base pair genomic regions (`MethylationRegion`) exhibiting differential methylation.
+The `MEASURED_DIFFERENTIAL_EXPRESSION` relationship encodes Log₂ fold changes derived from transcription profiling assays, while the `MEASURED_DIFFERENTIAL_METHYLATION` relationship captures methylation differences identified through DNA methylation assays. The `METHYLATED_IN` relationship links model organism genes (`MGene`) to 1,000 base pair genomic regions (`MethylationRegion`) exhibiting differential methylation.
 
 Proxy nodes (shown in gray) represent standardized identifiers for human genes (ENTREZ ID), anatomical structures (UBERON ID), and cell types (CL ID), enabling integration with external Neo4j databases and supporting composite graph database construction.
 
@@ -56,10 +56,10 @@ Diagram generated using [arrows.app](https://arrows.app).
 The following node and relationship metadata files define the graph schema.
 
 - **Nodes**  
-  [kg/v0.0.3/metadata/nodes/](kg/v0.0.3/metadata/nodes/)
+  [kg/v0.0.4/metadata/nodes/](kg/v0.0.4/metadata/nodes/)
 
 - **Relationships**   
-  [kg/v0.0.3/metadata/relationships/](kg/v0.0.3/metadata/relationships/)
+  [kg/v0.0.4/metadata/relationships/](kg/v0.0.4/metadata/relationships/)
 
 The organization and conventions for defining the metadata and data are described in the [kg-import](https://github.com/sbl-sdsc/kg-import) Git repository.
 
@@ -142,7 +142,7 @@ mamba env create -f environment.yml
 
 KG version number
 
-`KG_VERSION=v0.0.3`
+`KG_VERSION=v0.0.4`
 
 Path to the cloned git repository
 
@@ -187,7 +187,7 @@ jupyter lab
 | 5_import_to_neo4j.ipynb    | Imports the formatted data into a Neo4j KG |
 | 6_query_examples.ipynb     | Runs example queries (optional) |
 
-5. When the import is completed, click the `Refresh` button in Neo4j Desktop. The newly created database `spoke-genelab-v0.0.3` will be listed.
+5. When the import is completed, click the `Refresh` button in Neo4j Desktop. The newly created database `spoke-genelab-v0.0.4` will be listed.
 
 ![](docs/db_imported.png)
 
@@ -199,13 +199,13 @@ jupyter lab
 
 ![](docs/select_db_icon.png)
 
-8. Use the pull-down menu to select a version of `spoke-genelab-v0.0.3` database. Wait for about 30+ seconds until the database is loaded and the nodes are listed as shown below.
+8. Use the pull-down menu to select a version of `spoke-genelab-v0.0.4` database. Wait for about 30+ seconds until the database is loaded and the nodes are listed as shown below.
    
 ![](docs/db_ready.png)
 
 9. Set the Graph Stylesheet
 
-Drag the file kg/v0.0.3/style.grass onto the Neo4j Browser window to set the node colors, sizes, and labels.
+Drag the file kg/v0.0.4/style.grass onto the Neo4j Browser window to set the node colors, sizes, and labels.
 
 10. Now you are ready to run Cypher queries on the selected database.
 
@@ -220,11 +220,11 @@ To stop the conda environment, type
 ### Dump Neo4J Graph Database
 1. Stop the database
 
-2. Hover the cursor over the `spoke-genelab-v0.0.3` database and select `Dump` from the menu.
+2. Hover the cursor over the `spoke-genelab-v0.0.4` database and select `Dump` from the menu.
 
 ![](docs/dump_db.png)
 
-3. When the dump is complete, click the `Reveal files in Finder` button to open the directory that contains the `spoke-genelab-v0.0.3.dump` file.
+3. When the dump is complete, click the `Reveal files in Finder` button to open the directory that contains the `spoke-genelab-v0.0.4.dump` file.
 
 ![](docs/dump_location.png)
 
@@ -234,7 +234,7 @@ This database dump will be used to create the SPOKE-GeneLab composite database.
 
 ## 📚 Citation
 
-PW Rose, CA Nelson, SG Gebre, K Soman, KA Grigorev, LM Sanders, SV Costes, SE Baranzini, NASA SPOKE-GeneLab Knowledge Graph. Available online: https://github.com/BaranziniLab/spoke_genelab (2025)
+PW Rose, CA Nelson, SG Gebre, AM Saravia-Butler, K Soman, KA Grigorev, LM Sanders, SV Costes, SE Baranzini, NASA SPOKE-GeneLab Knowledge Graph. Available online: https://github.com/BaranziniLab/spoke_genelab (2025)
 
 CA Nelson, PW Rose, K Soman, LM Sanders, SG Gebre, SV Costes, SE Baranzini, Nasa Genelab-Knowledge Graph Fabric Enables Deep Biomedical Analysis of Multi-Omics Datasets, https://ntrs.nasa.gov/citations/20250000723 (2025)
 
