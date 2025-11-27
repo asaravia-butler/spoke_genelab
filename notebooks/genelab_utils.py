@@ -84,6 +84,7 @@ def validate_kg_metadata():
 def get_processed_datasets():
     metadata = get_info()
     metadata = filter_by_gl_processed(metadata)
+    metadata = filter_by_assay_type(metadata)
     metadata = add_sample_counts(metadata)
     return metadata
 
@@ -165,6 +166,31 @@ def filter_by_gl_processed(metadata):
     ].copy()
 
 
+def filter_by_assay_type(metadata):
+    """
+    Filter out records where assay_name contains '-upx' or '-mrna' substrings.
+    
+    Parameters:
+    -----------
+    metadata : pd.DataFrame
+        DataFrame containing an 'assay_name' column
+        
+    Returns:
+    --------
+    pd.DataFrame
+        Filtered DataFrame excluding records with '-upx' or '-mrna' in assay_name
+    """
+    metadata["assay_name"] = (
+        metadata["assay_name"]
+        .fillna("")
+        .apply(lambda s: (s if not re.search(r"-upx|-mrna", s, flags=re.IGNORECASE) else False))
+    )
+    
+    metadata = metadata.drop_duplicates()
+    
+    return metadata[metadata["assay_name"] != False].copy()
+
+
 def add_sample_counts(metadata):
     per_sample_counts = metadata.drop(columns="id.sample name").value_counts().reset_index()
     per_sample_counts.insert(
@@ -236,9 +262,11 @@ def get_file_info(data, file_type):
     for identifier, content in data.items():
         files = content.get("files", {})
         for file_name, file_details in files.items():
-            # These types of files are obsolete
-            if "ERCCnorm" in file_name:
+            # Skip the following types of differential expression files
+            skip_terms = ("ERCCnorm", "rRNArm", "mRNA", "UPX")
+            if any(term in file_name for term in skip_terms):
                 continue
+                
             if file_type in file_name:
                 rows.append(
                     {
