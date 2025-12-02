@@ -559,6 +559,7 @@ def extract_transcription_data(assays: pd.DataFrame, threshold: float) -> pd.Dat
     extract ENTREZID/log2fc/adj_p.value columns, filter by threshold, and
     return a DataFrame of edges with columns ['from', 'to', 'log2fc', 'adj_p_value'].
     """
+    print("extract_transcription_data:", threshold)
     rows = []
     cols = ["from", "to", "log2fc", "adj_p_value"]
 
@@ -610,6 +611,7 @@ def extract_methylation_data(assays: pd.DataFrame, threshold: float = 0.05) -> p
     extract ENTREZID/methylation_diff/q_value and region columns, filter by
     q‑value threshold, and return a DataFrame with the combined results.
     """
+    print("extract_methylation_data:", threshold)
     rows = []
     cols = [
         "ENTREZID",
