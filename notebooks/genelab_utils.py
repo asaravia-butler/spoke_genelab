@@ -103,6 +103,10 @@ def get_info():
         "&"
         "study.characteristics.material type.term accession number"
         "&"
+        "study.characteristics.host organism"
+        "&"
+        "study.characteristics.host strain"
+        "&"
         "file.category"
         "&"
         "file.subcategory"
@@ -111,7 +115,7 @@ def get_info():
         # "&" "format.header.multi" # you'd use this to break up the header into two lines for the "legacy" format
         # "&" "format.header.mark" # you'd use this to prepend "#" to header lines for the "legacy" format
     )
-    metadata = pd.read_csv(quote(url, safe=":/=?&"), na_filter=False)
+    metadata = pd.read_csv(quote(url, safe=":/=?&"), na_filter=False).replace(["NaN", "nan", "NA", "NULL", "None"], "").fillna("")
 
     # Simplify column names
     metadata.rename(
@@ -121,6 +125,8 @@ def get_info():
             "investigation.study assays.study assay technology type": "technology",
             "id.assay name": "assay_name",
             "study.characteristics.material type": "material",
+            "study.characteristics.host organism": "host_organism",
+            "study.characteristics.host strain": "host_strain",
         },
         inplace=True,
     )
@@ -205,12 +211,20 @@ def filter_by_technology_type(metadata, technology_types):
     ].copy()
 
 
+def filter_by_host_organism(metadata, taxids):
+    # Reverse lookup: host_organism -> taxononmy
+    inv_taxids = dict(zip(taxids.values(), taxids.keys()))
+    metadata = metadata[(metadata["host_organism"] == "") | (metadata["host_organism"].isin(inv_taxids))].copy()
+    metadata["host_taxonomy"] = metadata["host_organism"].map(inv_taxids)
+    return metadata
+
+
 def filter_by_organism(metadata, taxids):
     metadata = metadata[metadata["taxonomy"].isin(taxids)].copy()
     metadata["organism"] = metadata["taxonomy"].map(taxids)
     return metadata
 
-
+    
 def download_data_files(assays, file_types, filters, reset=False):
     if reset:
         shutil.rmtree(DATASET_PATH)
@@ -248,6 +262,7 @@ def download_data_files(assays, file_types, filters, reset=False):
                     file_info = row.copy()
                     file_info["filename"] = filename
                     file_info["url"] = file_url
+                    file_info["differential_analysis_method"] = info["differential_analysis_method"]
                     file_list.append(file_info)
 
             except requests.exceptions.RequestException as e:
@@ -266,18 +281,33 @@ def get_file_info(data, file_type):
             skip_terms = ("ERCCnorm", "rRNArm", "mRNA", "UPX")
             if any(term in file_name for term in skip_terms):
                 continue
-                
+
             if file_type in file_name:
                 rows.append(
                     {
                         "identifier": identifier,
                         "filename": file_name,
                         "url": file_details.get("URL"),
+                        "differential_analysis_method": get_differential_analysis_method(file_name)
                     }
                 )
     return rows
 
 
+def get_differential_analysis_method(file_name):
+    if "ancombc1" in file_name:
+        return "ANCOMB-BC"
+    if "ancombc2" in file_name:
+        return "ANCOMB-BC2"
+    if "deseq2" in file_name:
+        return "DESeq2"
+    if "differential_expression" in file_name:
+        return "DESeq2"
+    if "differential_methylation" in file_name:
+        return "methylKit"
+    return ""
+
+    
 def download_data_file(url, filename, filter_func, dataset_path):
     file_path = os.path.join(dataset_path, filename)
 
@@ -310,13 +340,44 @@ def download_data_file(url, filename, filter_func, dataset_path):
     return True
 
 
+def add_reversed_contrast_columns(df):
+    """
+    Add reversed (y)v(x) columns for columns named like something_(x)v(y).
+    For meth.diff_ columns, the values are sign-flipped.
+    """
+    new_cols = {}
+
+    pattern = re.compile(r'^(?P<prefix>.+)_\((?P<x>.+)\)v\((?P<y>.+)\)$')
+
+    for col in df.columns:
+        match = pattern.match(col)
+        if not match:
+            continue
+
+        prefix = match.group("prefix")
+        x = match.group("x")
+        y = match.group("y")
+
+        reversed_col = f"{prefix}_({y})v({x})"
+
+        if prefix.startswith("meth.diff"):
+            new_cols[reversed_col] = -df[col]
+        else:
+            new_cols[reversed_col] = df[col]
+
+    return df.assign(**new_cols)
+
+    
 def get_metadata(manifest):
     study_list = []
     for _, row in manifest.iterrows():
         identifier = row["identifier"]
         taxonomy = row["taxonomy"]
         organism = row["organism"]
-        study_list.extend(extract_metadata(identifier, taxonomy, organism))
+        host_organism = row["host_organism"]
+        host_taxonomy = row["host_taxonomy"]
+        host_strain = row["host_strain"]
+        study_list.extend(extract_metadata(identifier, taxonomy, organism, host_organism, host_taxonomy, host_strain))
         time.sleep(0.1)
 
     return pd.DataFrame(study_list)
@@ -348,7 +409,7 @@ def to_list(x):
     return [x]
 
 
-def extract_metadata(accession, taxonomy, organism):
+def extract_metadata(accession, taxonomy, organism, host_organism, host_taxonomy, host_strain):
     """
     Fetches the JSON for the given OSDR dataset accession (e.g. "OSD-47")
     and extracts:
@@ -405,6 +466,9 @@ def extract_metadata(accession, taxonomy, organism):
             "description": description,
             "taxonomy": taxonomy,
             "organism": organism,
+            "host_organism": host_organism,
+            "host_taxonomy": host_taxonomy,
+            "host_strain": host_strain,
             "flight_program": flight_program,
             "space_program": space_program,
             "mission_id": name.replace(" ", "-"),
@@ -422,15 +486,20 @@ def extract_gene_info(manifest):
     for _, row in manifest.iterrows():
         file_path = os.path.join(DATASET_PATH, row["filename"])
         if os.path.exists(file_path):
-            df = pd.read_csv(
-                file_path,
-                usecols=["ENTREZID", "SYMBOL", "GENENAME"],
-                dtype=str,
-                keep_default_na=False,
-            )
-            df["organism"] = row["organism"]
-            df["taxonomy"] = str(row["taxonomy"])
-            gene_list.append(df)
+            # Try if file contains gene data
+            try:
+                df = pd.read_csv(
+                    file_path,
+                    usecols=["ENTREZID", "SYMBOL", "GENENAME"],
+                    dtype=str,
+                    keep_default_na=False,
+                )
+                df["organism"] = row["organism"]
+                df["taxonomy"] = str(row["taxonomy"])
+                gene_list.append(df)
+            
+            except Exception as e:
+               continue
 
     mgenes = pd.concat(gene_list, ignore_index=True)
     mgenes.drop_duplicates(subset="ENTREZID", inplace=True)
@@ -478,16 +547,29 @@ def get_factor_data(row, dataset_path, variables):
     file_path = os.path.join(dataset_path, row["filename"])
     data = pd.read_csv(file_path, low_memory=False, nrows=1)
     cols = data.columns
-    end_points = variables.get(row["measurement"], "")
+    end_points = variables.get(row["differential_analysis_method"], "")
     if end_points == "":
         print(
-            f"Error: no relevant columns found in file {row['filename']} for {variables.keys()} measurements"
+            f"Error: no relevant columns found in file {row['filename']} for {variables.keys()} differential analysis methods"
         )
         return []
     factors = [get_factors(col) for col in cols if col.startswith(end_points)]
 
     return factors
 
+# def get_factor_data(row, dataset_path, variables):
+#     file_path = os.path.join(dataset_path, row["filename"])
+#     data = pd.read_csv(file_path, low_memory=False, nrows=1)
+#     cols = data.columns
+#     end_points = variables.get(row["measurement"], "")
+#     if end_points == "":
+#         print(
+#             f"Error: no relevant columns found in file {row['filename']} for {variables.keys()} measurements"
+#         )
+#         return []
+#     factors = [get_factors(col) for col in cols if col.startswith(end_points)]
+
+#     return factors
 
 def get_factors(column_name):
     factors_string = column_name.split("_", 1)[1]
@@ -693,6 +775,113 @@ def extract_methylation_data(assays: pd.DataFrame, threshold: float = 0.05) -> p
             rows.append(sub[cols])
 
     # concatenate or return empty frame with proper columns
+    if rows:
+        return pd.concat(rows, ignore_index=True)
+    return pd.DataFrame(columns=cols)
+
+
+def extract_amplicon_deseq2_data(assays: pd.DataFrame, threshold: float) -> pd.DataFrame:
+    """
+    For each amplicon sequencing assay in `assays`, read its file once,
+    extract NCBI_id, best_taxonomy, Log2fc, and Adj.p.value columns, filter by threshold, and
+    return a DataFrame of edges with columns ["from", "to", "name", "log2fc", "adj_p_value"].
+    """
+    print("extract_amplicon_data:", threshold)
+    rows = []
+    cols = ["from", "to", "name", "log2fc", "adj_p_value"]
+
+    # Filter DESeq2 data and group by filename
+    tp = assays[(assays["measurement"] == "Amplicon Sequencing") & (assays["differential_analysis_method"] == "DESeq2")]
+    for filename, grp in tp.groupby("filename"):
+        # Print study_id when loading a new file
+        print(f"processing: {grp['study_id'].iat[0]}")
+        df = pd.read_csv(os.path.join(DATASET_PATH, filename), low_memory=False)
+
+        for _, row in grp.iterrows():
+            f = row["factors"]
+            log2fc_col = f"Log2fc_{f}"
+            adj_col = f"Adj.p.value_{f}"
+
+            # Skip if expected columns are missing
+            if not {log2fc_col, adj_col}.issubset(df.columns):
+                continue
+
+            # Select columns
+            sub = df[["NCBI_id", "best_taxonomy", log2fc_col, adj_col]].dropna()
+
+            # Filter by p‑value threshold
+            sub = sub[sub[adj_col] <= threshold]
+            if sub.empty:
+                print(f"No statistically significant data for {row.study_id}: {log2fc_col}")
+                continue
+
+            # Rename to Neo4j convention
+            sub = sub.rename(
+                columns={"NCBI_id": "to", "best_taxonomy": "name", log2fc_col: "log2fc", adj_col: "adj_p_value"}
+            )
+            sub["from"] = row["identifier"]  # direct assignment of "from"
+            sub["to"] = sub["to"].astype(int)
+
+            # Keep only the four columns in order
+            sub = sub[cols]
+            rows.append(sub)
+
+    # Concatenate or return empty
+    if rows:
+        return pd.concat(rows, ignore_index=True)
+    return pd.DataFrame(columns=cols)
+
+
+def extract_amplicon_ancombc_data(assays: pd.DataFrame, threshold: float) -> pd.DataFrame:
+    """
+    For each amplicon sequencing assay in `assays`, read its file once,
+    extract NCBI_id, best_taxonomy, Lnfc and Q.value columns, filter by threshold, and
+    return a DataFrame of edges with columns  ["from", "to", "name", "lnfc", "q_value"].
+    """
+    print("extract_amplicon_data:", threshold)
+    rows = []
+    cols = ["from", "to", "name", "lnfc", "q_value"]
+
+    # Filter ANCOMB-BC data and group by filename
+    tp = assays[
+        (assays["measurement"] == "Amplicon Sequencing") &
+        (assays["differential_analysis_method"].isin(["ANCOMB-BC", "ANCOMB-BC2"]))
+    ]
+    for filename, grp in tp.groupby("filename"):
+        # Print study_id when loading a new file
+        print(f"processing: {grp['study_id'].iat[0]}")
+        df = pd.read_csv(os.path.join(DATASET_PATH, filename), low_memory=False)
+
+        for _, row in grp.iterrows():
+            f = row["factors"]
+            lnfc_col = f"Lnfc_{f}"
+            qvalue_col = f"Q.value_{f}"
+
+            # Skip if expected columns are missing
+            if not {lnfc_col, qvalue_col}.issubset(df.columns):
+                continue
+
+            # Select columns
+            sub = df[["NCBI_id", "best_taxonomy", lnfc_col, qvalue_col]].dropna()
+
+            # Filter by q‑value threshold
+            sub = sub[sub[qvalue_col] <= threshold]
+            if sub.empty:
+                print(f"No statistically significant data for {row.study_id}: {lnfc_col}")
+                continue
+
+            # Rename to Neo4j convention
+            sub = sub.rename(
+                columns={"NCBI_id": "to", "best_taxonomy": "name", lnfc_col: "lnfc", qvalue_col: "q_value"}
+            )
+            sub["from"] = row["identifier"]  # direct assignment of "from"
+            sub["to"] = sub["to"].astype(int)
+
+            # Keep only the four columns in order
+            sub = sub[cols]
+            rows.append(sub)
+
+    # Concatenate or return empty
     if rows:
         return pd.concat(rows, ignore_index=True)
     return pd.DataFrame(columns=cols)

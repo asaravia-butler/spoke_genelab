@@ -19,10 +19,12 @@ This repository contains the code and metadata needed to build a **Knowledge Gra
 
 | Measurement                  | Technology                                              | Property         | Selection Criteria |
 | ---------------------------- | ------------------------------------------------------- | -----------------|-----------------|
-| Transcription profiling      | RNA Sequencing (RNA‑Seq)                                | Log2 fold change | Adjusted p-value <= 0.1 |
-| Transcription profiling      | DNA microarray                                          | Log2 fold change | Adjusted p-value <= 0.1 |
+| Transcription profiling      | RNA Sequencing (RNA‑Seq)                                | Log2 fold change (expression) | Adjusted p-value <= 0.1 |
+| Transcription profiling      | DNA microarray                                          | Log2 fold change (expression) | Adjusted p-value <= 0.1 |
 | DNA methylation profiling    | Whole Genome Bisulfite Sequencing                       | Methylation difference % | q-value <= 0.1 |
 | DNA methylation profiling    | Reduced‑Representation Bisulfite Sequencing (RRBS)      | Methylation difference % | q-value <= 0.1 |
+| Amplicon Sequencing          | 16S, 18S, ITS, 16S and ITS                              | Log2 fold change (abundance) | Adjusted p-value <= 0.1 |
+| Amplicon Sequencing          | 16S, 18S, ITS, 16S and ITS                              | Ln fold change (abundance) | q-value <= 0.1 |
 
 ---
 

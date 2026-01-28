@@ -92,12 +92,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# Spark 
-mmtfPyspark/metastore_db
-spark-warehouse
-*.crc
-.
-
 # test file
 ./test.py
 
@@ -107,6 +101,9 @@ logs/
 
 # Nemo
 config.yml
+
+# MacOS
+.DS_Store
 
 # spoke_genelab 
 PrepareNeo4jBulkImport_out.ipynb

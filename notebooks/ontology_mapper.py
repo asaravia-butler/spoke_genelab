@@ -11,7 +11,7 @@ import time
 import pandas as pd
 import inflection
 
-CHUNK_SIZE = 50
+CHUNK_SIZE = 25
 
 def map_ontology(df, input_col, output_col, ontology, apikey):
     """
