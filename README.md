@@ -41,15 +41,117 @@ This repository contains the code and metadata needed to build a **Knowledge Gra
 
 ## 🕸️ Graph Schema
 
-![Simplified Graph Schema](docs/spoke-genelab-v0.0.5-simplified.png)
+```mermaid
+classDiagram
+direction TB
 
-**Figure**: Schematic overview of the GeneLab knowledge graph structure, highlighting key node types (circles) and relationships (arrows).
+class Mission {
+    STRING identifier
+    STRING name
+    STRING space_program
+    STRING flight_program
+    DATE start_date
+    DATE end_date
+}
 
-The `MEASURED_DIFFERENTIAL_EXPRESSION` relationship encodes Log₂ fold changes derived from transcription profiling assays, while the `MEASURED_DIFFERENTIAL_METHYLATION` relationship captures methylation differences identified through DNA methylation assays. The `METHYLATED_IN` relationship links model organism genes (`MGene`) to 1,000 base pair genomic regions (`MethylationRegion`) exhibiting differential methylation.
+class Study {
+    STRING identifier
+    STRING name
+    STRING project_title
+    STRING description
+    STRING project_type
+    STRING organism
+    STRING taxonomy
+    STRING host_organism
+    STRING host_taxonomy
+    STRING host_strain
+}
 
-Proxy nodes (shown in gray) represent standardized identifiers for human genes (ENTREZ ID), anatomical structures (UBERON ID), and cell types (CL ID), enabling integration with external Neo4j databases and supporting composite graph database construction.
+class Assay {
+    STRING identifier
+    STRING name
+    STRING measurement
+    STRING technology
+    STRING differential_analysis_method
+    STRING material_1
+    STRING material_name_1
+    STRING material_id_1
+    STRING material_2
+    STRING material_name_2
+    STRING material_id_2
+    STRING factor_space_1
+    STRING factor_space_2
+    LIST factors_1
+    LIST factors_2
+}
 
-Diagram generated using [arrows.app](https://arrows.app).
+class MGene {
+    STRING identifier
+    STRING symbol
+    STRING name
+    STRING organism
+    STRING taxonomy
+}
+
+class Gene {
+    STRING identifier
+}
+
+class MethylationRegion {
+    STRING identifier
+    STRING name
+    STRING chromosome
+    INTEGER start
+    INTEGER end
+    BOOLEAN in_promoter
+    BOOLEAN in_intron
+    BOOLEAN in_exon
+    INTEGER dist_to_feature
+}
+
+class Organism {
+    STRING identifier
+    STRING name
+}
+
+class Anatomy {
+    STRING identifier
+}
+
+class CellType {
+    STRING identifier
+}
+
+class MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG {
+    float log2fc
+    float adj_p_value
+}
+
+class MEASURED_DIFFERENTIAL_METHYLATION_ASmMR {
+    float methylation_diff
+    float q_value
+}
+
+class MEASURED_DIFFERENTIAL_ABUNDANCE_ASmO {
+    float log2fc
+    float lnfc
+    float adj_p_value
+    float q_value
+}
+
+Mission --> Study : CONDUCTED_MIcS
+Study --> Assay : PERFORMED_SpAS
+Assay --> MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG
+MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG --> MGene
+Assay --> MEASURED_DIFFERENTIAL_METHYLATION_ASmMR
+MEASURED_DIFFERENTIAL_METHYLATION_ASmMR --> MethylationRegion
+Assay --> MEASURED_DIFFERENTIAL_ABUNDANCE_ASmO
+MEASURED_DIFFERENTIAL_ABUNDANCE_ASmO --> Organism
+Assay --> Anatomy : INVESTIGATED_ASiA
+Assay --> CellType : INVESTIGATED_ASiCT
+MGene --> Gene : IS_ORTHOLOG_MGiG
+MGene --> MethylationRegion : METHYLATED_IN_MGmMR
+```
 
 ---
 
@@ -58,10 +160,10 @@ Diagram generated using [arrows.app](https://arrows.app).
 The following node and relationship metadata files define the graph schema.
 
 - **Nodes**  
-  [kg/v0.1.0/metadata/nodes/](kg/v0.1.0/metadata/nodes/)
+  [kg/v0.2.0/metadata/nodes/](kg/v0.2.0/metadata/nodes/)
 
 - **Relationships**   
-  [kg/v0.1.0/metadata/relationships/](kg/v0.1.0/metadata/relationships/)
+  [kg/v0.2.0/metadata/relationships/](kg/v0.2.0/metadata/relationships/)
 
 The organization and conventions for defining the metadata and data are described in the [kg-import](https://github.com/sbl-sdsc/kg-import) Git repository.
 
