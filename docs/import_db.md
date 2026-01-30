@@ -32,7 +32,7 @@
   <img src="stop_instance.png" width="600">
 </p>
 
-5. Select `Load database from file` for them `...` menu next to the new database
+5. Select `Load database from file` from the `...` menu next to the new database
 
 <p align="center">
   <img src="load_from_db.png" width="600">
