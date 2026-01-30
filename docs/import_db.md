@@ -19,7 +19,7 @@
 </p>
 
 3. Enter the exact database name, e.g., spoke-genelab-v0.2.0
-4. 
+
 <p align="center">
   <img src="create_db.png" width="400">
 </p>
@@ -32,13 +32,13 @@
   <img src="stop_instance.png" width="600">
 </p>
 
-4. Select `Load database from file` for them `...` menu next to the new database
+5. Select `Load database from file` for them `...` menu next to the new database
 
 <p align="center">
   <img src="load_from_db.png" width="600">
 </p> 
 
-5. Import dump file
+6. Import dump file
 
 > Choose the option: `Allow overwriting` when importing the file.
 
@@ -48,19 +48,19 @@
 
 ## Optional: Explore the KG
 
-6. Start the instance
+7. Start the instance
 
 <p align="center">
   <img src="start_instance.png" width="600">
 </p>
 
-7. Select `Query` from the `Connect` menu
+8. Select `Query` from the `Connect` menu
 
 <p align="center">
   <img src="select_query.png" width="600">
 </p>
 
-8. Select the database version that was imported (wait until the data are loaded ~ 30 seconds)
+9. Select the database version that was imported (wait until the data are loaded ~ 30 seconds)
 
 > Details about the nodes and relationships are displayed
 
@@ -68,7 +68,7 @@
   <img src="select_db.png" width="600">
 </p>
 
-9. Display the KG schema. Type `CALL apoc.meta.graph()` in the query dialog box
+10. Display the KG schema. Type `CALL apoc.meta.graph()` in the query dialog box
 
 > Drag the nodes to rearange them
 
