@@ -10,8 +10,8 @@ This repository contains the code and metadata needed to build a **Knowledge Gra
 - **Incremental update** for new datasets
 - **Statistical filtering** of results for significance
 - **Species selection** via a configurable whitelist
-- **Versioned metadata** for reproducibility (v0.1.0)
-- **Federated query** using Neo4j Fabric with the [Scalable Precision Medicine Open Knowledge Engine (SPOKE) KG](https://spoke.ucsf.edu/)
+- **Versioned metadata** for reproducibility
+- **Natural language queries** using [MCP-GeneLab](https://github.com/sbl-sdsc/mcp-genelab)
 
 ---
 
