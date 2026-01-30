@@ -1,12 +1,10 @@
 ## 📥 Import spoke-genelab Knowledge Graph
 
-*Note, the spoke-genelab instance can hold multiple versions of the spoke-genelab KG*
-
 > Note: The spoke-genelab instance can hold multiple versions of the spoke-genelab KG.
 
 1. Download the Neo4j dump file
 
-[![Download spoke-genelab-v0.2.0](https://img.shields.io/badge/Download-spoke--genelab%20v0.2.0-brightgreen)](https://drive.google.com/file/d/12k-Th38GhL6g6QigUNNCY2RNIBY_MARY/view?usp=sharing)
+[![Download spoke-genelab-v0.2.0](https://img.shields.io/badge/Download-spoke--genelab%20v0.2.0-brightgreen)](https://drive.google.com/file/d/17abOQB6wu0nTbWZoehvfo5V9ZqHhzU-1/view?usp=sharing)
 
 2. Launch Neo4j Desktop and start the `spoke-genelab` instance
 
