@@ -1,0 +1,11 @@
+property,type,description,example
+from,string,Unique assay identifier combining GeneLab dataset accession and MD5 hash of metadata (links assay to dataset and ensures version integrity),GLDS-401-ec55d3e698d289f2afd663725127
+to,string,NCBI taxonomy id,286
+log2fc,float,"Log2-transformed fold change in organism or taxon abundance between the experimental condition and its reference baseline. Positive values indicate increased abundance, while negative values denote decreased abundance relative to the control.",-0.145485596
+adj_p_value,float,"Multiple testing-corrected p-value assessing the statistical significance of each taxons differential abundance after controlling the false-discovery rate (FDR). Smaller values (e.g., <= 0.05) indicate that the observed differential abundance is unlikely to arise by chance, even after accounting for the large number of simultaneous tests performed in the experiment.",0.016441347
+lnfc,float,"Ln-transformed fold change in organism or taxon abundance between the experimental condition and its reference baseline. Positive values indicate increased abundance, while negative values denote decreased abundance relative to the control.",-0.145485596
+q_value,float,Adjusted p-value to control for false discovery rate,0.0463
+group_mean_1,float,Group mean for first sample group,0.5
+group_stdev_1,float,Group stdev for first sample group,0.5
+group_mean_2,float,Group mean for second sample group,0.5
+group_stdev_2,float,Group stdev for second sample group,0.5

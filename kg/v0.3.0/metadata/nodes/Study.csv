@@ -1,0 +1,11 @@
+property,type,description,example
+identifier,string,NASA Open Science Data Repository ID,OSD-47
+name,string,Name of the study,OSD-47
+project_title,string,Title of project,"Rodent Research-1(RR-1), Muscle Atrophy of Muscle Sparing in Transgenic Mice (CASIS RR1)"
+project_type,string,Type of project,Spaceflight Study
+description,string,Description of the study,The Rodent Reasearch-1 National Lab (RR-1 CASIS) experiment was performed to study ...
+organism,string,NCBI scientific organism name,Mus musculus
+taxonomy,string,NCBI taxonomy ID,10090
+host_organism,string,"Scientific name of the biological organism from which the sample was derived, representing the biological species used in the spaceflight or analog experiment",Lactuca sativa
+host_taxonomy,string,"NCBI taxonomic classification (e.g., lineage or higher-level) describing the organism’s placement within a biological taxonomy to contextualize its evolutionary relationships",4236
+host_strain,string,"Specific genetic background, cultivar, or strain identifier of the host organism, distinguishing sub-populations or lines used in the study to control for genetic variation",Outredgeous

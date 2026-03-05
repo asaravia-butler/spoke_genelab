@@ -44,10 +44,10 @@ This repository contains the code and metadata needed to build a **Knowledge Gra
 The following node and relationship metadata files define the graph schema.
 
 - **Nodes**  
-  [https://github.com/BaranziniLab/spoke_genelab/blob/main/kg/v0.2.0/metadata/nodes/](kg/v0.2.0/metadata/nodes/)
+  [https://github.com/BaranziniLab/spoke_genelab/blob/main/kg/v0.3.0/metadata/nodes/](kg/v0.3.0/metadata/nodes/)
 
 - **Relationships**   
-  [https://github.com/BaranziniLab/spoke_genelab/blob/main/kg/v0.2.0/metadata/relationships/](kg/v0.2.0/metadata/relationships/)
+  [https://github.com/BaranziniLab/spoke_genelab/blob/main/kg/v0.3.0/metadata/relationships/](kg/v0.3.0/metadata/relationships/)
 
 The organization and conventions for defining the metadata and data are described in the [kg-import](https://github.com/sbl-sdsc/kg-import) Git repository.
 
@@ -61,8 +61,8 @@ direction TB
 class Mission {
     STRING identifier
     STRING name
-    STRING space_program
     STRING flight_program
+    STRING space_program
     DATE start_date
     DATE end_date
 }
@@ -70,14 +70,14 @@ class Mission {
 class Study {
     STRING identifier
     STRING name
-    STRING project_title
     STRING description
+    STRING project_title
     STRING project_type
     STRING organism
     STRING taxonomy
     STRING host_organism
-    STRING host_taxonomy
     STRING host_strain
+    STRING host_taxonomy
 }
 
 class Assay {
@@ -86,22 +86,22 @@ class Assay {
     STRING measurement
     STRING technology
     STRING differential_analysis_method
-    STRING material_1
-    STRING material_name_1
-    STRING material_id_1
-    STRING material_2
-    STRING material_name_2
-    STRING material_id_2
     STRING factor_space_1
     STRING factor_space_2
     LIST factors_1
     LIST factors_2
+    STRING material_1
+    STRING material_2
+    STRING material_id_1
+    STRING material_id_2
+    STRING material_name_1
+    STRING material_name_2
 }
 
 class MGene {
     STRING identifier
-    STRING symbol
     STRING name
+    STRING symbol
     STRING organism
     STRING taxonomy
 }
@@ -116,15 +116,10 @@ class MethylationRegion {
     STRING chromosome
     INTEGER start
     INTEGER end
-    BOOLEAN in_promoter
-    BOOLEAN in_intron
     BOOLEAN in_exon
+    BOOLEAN in_intron
+    BOOLEAN in_promoter
     INTEGER dist_to_feature
-}
-
-class Organism {
-    STRING identifier
-    STRING name
 }
 
 class Anatomy {
@@ -135,14 +130,27 @@ class CellType {
     STRING identifier
 }
 
+class Organism {
+    STRING identifier
+    STRING name
+}
+
 class MEASURED_DIFFERENTIAL_EXPRESSION_ASmMG {
     float log2fc
     float adj_p_value
+    float group_mean_1
+    float group_mean_2
+    float group_stdev_1
+    float group_stdev_2
 }
 
 class MEASURED_DIFFERENTIAL_METHYLATION_ASmMR {
     float methylation_diff
     float q_value
+    float group_mean_1
+    float group_mean_2
+    float group_stdev_1
+    float group_stdev_2
 }
 
 class MEASURED_DIFFERENTIAL_ABUNDANCE_ASmO {
@@ -150,6 +158,10 @@ class MEASURED_DIFFERENTIAL_ABUNDANCE_ASmO {
     float lnfc
     float adj_p_value
     float q_value
+    float group_mean_1
+    float group_mean_2
+    float group_stdev_1
+    float group_stdev_2
 }
 
 Mission --> Study : CONDUCTED_MIcS
@@ -162,8 +174,8 @@ Assay --> MEASURED_DIFFERENTIAL_ABUNDANCE_ASmO
 MEASURED_DIFFERENTIAL_ABUNDANCE_ASmO --> Organism
 Assay --> Anatomy : INVESTIGATED_ASiA
 Assay --> CellType : INVESTIGATED_ASiCT
-MGene --> Gene : IS_ORTHOLOG_MGiG
 MGene --> MethylationRegion : METHYLATED_IN_MGmMR
+MGene --> Gene : IS_ORTHOLOG_MGiG
 ```
 
 ---
@@ -192,7 +204,7 @@ In Claude Desktop, add the following to the claude_desktop_config.json file to c
     "NEO4J_URI": "bolt://localhost:7687",
     "NEO4J_USERNAME": "neo4j",
     "NEO4J_PASSWORD": "neo4jdemo",
-    "NEO4J_DATABASE": "spoke-genelab-v0.2.0",
+    "NEO4J_DATABASE": "spoke-genelab-v0.3.0",
     "INSTRUCTIONS": "Query the GeneLab KG to identify NASA spaceflight experiments containing omics datasets, specifically differential gene expression (transcriptomics), DNA methylation (epigenomics) and Amplicon (metagenomics) data."
   }
 },
@@ -204,13 +216,13 @@ In Claude Desktop, add the following to the claude_desktop_config.json file to c
 
 ## ⚙️ Create spoke-genelab Knowledge Graph (for developers)
 
-[Create KG](https://github.com/BaranziniLab/spoke_genelab/blob/main/docs//create_kg.png)
+[Create KG](https://github.com/BaranziniLab/spoke_genelab/blob/main/docs/create_kg.png)
 
 ------
 
 ## 🔗 SPOKE - GeneLab Composite Database
 
-![](https://github.com/BaranziniLab/spoke_genelab/blob/main/docs/spoke-genlab-v0.0.3-composite.png)
+![](https://github.com/BaranziniLab/spoke_genelab/blob/main/docs/spoke-genelab-v0.3.0-composite.png)
 
 **Figure**: Integration of the SPOKE and GeneLab knowledge graphs using proxy nodes.  
 The **GeneLab** graph (right), a knowledge graph representing spaceflight omics datasets, depicts key experimental entities: `Assay`, `Study`, `Mission`, `MGene`, and `MethylationRegion`, along with their relationships. 

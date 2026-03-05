@@ -4,6 +4,7 @@ This module provides functions to map terms to concepts in an ontology.
 Author: Peter W Rose (pwrose@ucsd.edu)
 Created: 2024-03-03
 """
+
 import os
 import requests
 from dotenv import load_dotenv
@@ -12,6 +13,7 @@ import pandas as pd
 import inflection
 
 CHUNK_SIZE = 25
+
 
 def map_ontology(df, input_col, output_col, ontology, apikey):
     """
@@ -52,7 +54,7 @@ def map_ontology(df, input_col, output_col, ontology, apikey):
     0       liver     UBERON:0002107
     1       brain     UBERON:0000955
     2      zygote     CL:0010017
-    
+
     """
 
     # convert to lowercase and map to ontology
@@ -60,7 +62,7 @@ def map_ontology(df, input_col, output_col, ontology, apikey):
 
     # remove misc characters that interfere with ontology matching
     df["__lower__"] = df["__lower__"].str.replace("-", " ")
-    df["__lower__"] = df["__lower__"].str.replace(r'\(.*?\)', '', regex=True)
+    df["__lower__"] = df["__lower__"].str.replace(r"\(.*?\)", "", regex=True)
 
     # cleanup special cases from GeneLab
     if ontology == "UBERON":
@@ -69,18 +71,20 @@ def map_ontology(df, input_col, output_col, ontology, apikey):
         df["__lower__"] = df["__lower__"].str.replace("male", "")
         df["__lower__"] = df["__lower__"].str.replace("female", "")
         df["__lower__"] = df["__lower__"].str.replace("carcass", "")
-        df["__lower__"] = df["__lower__"].str.replace("tissue", "")
+        # df["__lower__"] = df["__lower__"].str.replace("tissue", "") # this changes cardiac muscle tissue to cardiac muscle
         df["__lower__"] = df["__lower__"].str.replace("mandibular bone", "mandible")
-        df["__lower__"] = df["__lower__"].str.replace("left lobe of the liver", "liver left lateral lobe")
+        df["__lower__"] = df["__lower__"].str.replace(
+            "left lobe of the liver", "liver left lateral lobe"
+        )
 
     df["__lower__"] = df["__lower__"].str.strip()
-    
+
     df = map_column_new(df, "__lower__", ontology, apikey)
 
     # remove anatomical positions and other prefixes to match UEBERON ontology classes
     df["__nopos__"] = df["__lower__"]
     if ontology == "UBERON":
-        df["__nopos__"] = df["__nopos__"].str.replace("left" , "")
+        df["__nopos__"] = df["__nopos__"].str.replace("left", "")
         df["__nopos__"] = df["__nopos__"].str.replace("right", "")
         df["__nopos__"] = df["__nopos__"].str.replace("both sides", "")
         df["__nopos__"] = df["__nopos__"].str.replace("medial", "")
@@ -95,49 +99,88 @@ def map_ontology(df, input_col, output_col, ontology, apikey):
         df["__nopos__"] = df["__nopos__"].str.replace("partial", "")
         df["__nopos__"] = df["__nopos__"].str.replace("whole", "")
         df["__nopos__"] = df["__nopos__"].str.replace("lobe of the", "lobe of")
-        df["__nopos__"] = df["__nopos__"].str.replace("3d", "") # 3d cells
-
+        df["__nopos__"] = df["__nopos__"].str.replace("3d", "")  # 3d cells
 
     df["__nopos__"] = df["__nopos__"].str.strip()
-    #print(df[["__nopos__"]].head())
+    # print(df[["__nopos__"]].head())
     df = map_column_new(df, "__nopos__", ontology, apikey)
 
     # convert plural to singular terms and map to ontology
-    df["__nopos__singular__"] = df["__nopos__"].apply(lambda x: inflection.singularize(x))
+    df["__nopos__singular__"] = df["__nopos__"].apply(
+        lambda x: inflection.singularize(x)
+    )
     df = map_column_new(df, "__nopos__singular__", ontology, apikey)
-    
+
     df["__singular__"] = df["__lower__"].apply(lambda x: inflection.singularize(x))
     df = map_column_new(df, "__singular__", ontology, apikey)
-
 
     # Create output columns
     output_id_col = output_col + "_id"
     output_name_col = output_col + "_name"
     output_uri_col = output_col + "_uri"
-    
+
     # coalesce mappings
-    df[output_uri_col] = df[["__id__lower__", "__id__nopos__", "__id__nopos__singular__", "__id__singular__"]].copy().bfill(axis=1).iloc[:, 0]
-    df[output_name_col] = df[["__name__lower__", "__name__nopos__", "__name__nopos__singular__", "__name__singular__"]].copy().bfill(axis=1).iloc[:, 0]
-    
+    df[output_uri_col] = (
+        df[
+            [
+                "__id__lower__",
+                "__id__nopos__",
+                "__id__nopos__singular__",
+                "__id__singular__",
+            ]
+        ]
+        .copy()
+        .bfill(axis=1)
+        .iloc[:, 0]
+    )
+    df[output_name_col] = (
+        df[
+            [
+                "__name__lower__",
+                "__name__nopos__",
+                "__name__nopos__singular__",
+                "__name__singular__",
+            ]
+        ]
+        .copy()
+        .bfill(axis=1)
+        .iloc[:, 0]
+    )
+
     # drop temporary columns
-    df.drop(columns=["__lower__", "__nopos__", "__nopos__singular__", "__singular__", 
-                     "__id__lower__", "__id__nopos__", "__id__nopos__singular__", "__id__singular__",
-                     "__name__lower__", "__name__nopos__", "__name__nopos__singular__", "__name__singular__",
-                    ], inplace=True)
-    
+    df.drop(
+        columns=[
+            "__lower__",
+            "__nopos__",
+            "__nopos__singular__",
+            "__singular__",
+            "__id__lower__",
+            "__id__nopos__",
+            "__id__nopos__singular__",
+            "__id__singular__",
+            "__name__lower__",
+            "__name__nopos__",
+            "__name__nopos__singular__",
+            "__name__singular__",
+        ],
+        inplace=True,
+    )
+
     df[output_uri_col] = df[output_uri_col].fillna("")
     df[output_name_col] = df[output_name_col].fillna("")
 
     # convert URI to CURIE
-    df[output_id_col] = df[output_uri_col].str.replace("http://purl.obolibrary.org/obo/", "", regex=False)
+    df[output_id_col] = df[output_uri_col].str.replace(
+        "http://purl.obolibrary.org/obo/", "", regex=False
+    )
     df[output_id_col] = df[output_id_col].str.replace("_", ":", regex=False)
-    
+
     return df
-    
+
 
 # def map_column(df, column, ontology, apikey):
 #     terms = list(df[column].unique())
-#     map = match_terms(terms, column, ontology, apikey) 
+#     map = match_terms(terms, column, ontology, apikey)
 #     df = df.merge(map, on=column, how="left")
 #     return df
 
@@ -145,7 +188,7 @@ def map_ontology(df, input_col, output_col, ontology, apikey):
 def map_column_new(df, column, ontology, apikey):
     terms = list(df[column].unique())
 
-    # BioPortal recommender can only handle a small number of terms at a time. 
+    # BioPortal recommender can only handle a small number of terms at a time.
     # Run it in small chunks
     chunks = create_chunks(terms, CHUNK_SIZE)
 
@@ -155,7 +198,7 @@ def map_column_new(df, column, ontology, apikey):
         dfs.append(mapped_terms)
 
     mapped_df = pd.concat(dfs)
-    
+
     df = df.merge(mapped_df, on=column, how="left")
     return df
 
@@ -178,24 +221,28 @@ def create_chunks(data, chunk_size):
         [[1, 2, 3], [4, 5, 6], [7, 8]]
     """
     # split list into chunks of max size: chunk_size
-    return [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
-    
+    return [data[i : i + chunk_size] for i in range(0, len(data), chunk_size)]
+
 
 def match_terms(terms, label, ontology, apikey):
     data = get_recommendation(terms, ontology, apikey)
     id_col = f"__id{label}"
     name_col = f"__name{label}"
-    
+
     if len(data) > 0:
-        match = pd.json_normalize(data[0]["coverageResult"], record_path="annotations", errors="ignore")
-        match.rename(columns={"text": label, "annotatedClass.@id": id_col}, inplace=True)
+        match = pd.json_normalize(
+            data[0]["coverageResult"], record_path="annotations", errors="ignore"
+        )
+        match.rename(
+            columns={"text": label, "annotatedClass.@id": id_col}, inplace=True
+        )
         match[label] = match[label].str.lower()
         match[name_col] = match[label]
         match = match[[label, id_col, name_col]].copy()
     else:
-        #print("empty data:", data)
+        # print("empty data:", data)
         match = pd.DataFrame(columns=[label, id_col, name_col])
-  
+
     return match
 
 
@@ -244,7 +291,7 @@ def get_recommendation(terms, ontologies, apikey):
     >>> recommendations = get_recommendation(terms, ontologies, APIKEY)
     """
     time.sleep(0.5)
-    
+
     URL = "https://data.bioontology.org/recommender"
     HEADERS = {"accept": "application/json", "Authorization": f"apikey token={apikey}"}
     terms_string = ",".join(terms)

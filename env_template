@@ -2,12 +2,12 @@
 #
 # Copy this file to .env and set the following variables according to your local installation.
 #
-KG_VERSION=v0.1.0
+KG_VERSION=v0.3.0
 # Path to the spoke_genelab repo
 KG_GIT=<absolute path to spoke_genelab repo>
 # Path to the Neo4J instance in Neo4j Desktop
 NEO4J_INSTALL_PATH="<path to Neo4j instance>"
-NEO4J_ADMIN_JAVA_OPTS="-Xms6g -Xmx10g -XX:+UseG1GC"
+NEO4J_ADMIN_JAVA_OPTS="-Xms12g -Xmx16g -XX:+UseG1GC"
 #
 # API for BioPortal
 BIOPORTAL_API_KEY=<bioportal api key>
