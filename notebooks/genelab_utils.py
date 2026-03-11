@@ -90,8 +90,8 @@ def validate_kg_metadata():
 def get_processed_datasets():
     metadata = get_info()
     metadata = filter_by_gl_processed(metadata)
-    metadata = filter_by_assay_type(metadata)
-    metadata = add_sample_counts(metadata)
+    metadata = metadata.drop_duplicates()
+    metadata.fillna("", inplace=True)
     return metadata
 
 
@@ -116,11 +116,16 @@ def get_info():
         "file.category"
         "&"
         "file.subcategory"
+        "&"
+        "file.file name"
+        "&"
+        "file.remote_url"
         # Note: the new API formats the header as a single line, but if you needed to break it up like before,
         # we have support for backwards compatibility:
         # "&" "format.header.multi" # you'd use this to break up the header into two lines for the "legacy" format
         # "&" "format.header.mark" # you'd use this to prepend "#" to header lines for the "legacy" format
     )
+
     metadata = (
         pd.read_csv(quote(url, safe=":/=?&"), na_filter=False)
         .replace(["NaN", "nan", "NA", "NULL", "None"], "")
@@ -137,8 +142,21 @@ def get_info():
             "study.characteristics.material type": "material",
             "study.characteristics.host organism": "host_organism",
             "study.characteristics.host strain": "host_strain",
+            "file.file name": "filename",
+            "file.remote_url": "url",
         },
         inplace=True,
+    )
+
+    # Keep only differential analysis files
+    metadata = metadata[
+        metadata["filename"].str.endswith(".csv")
+        & metadata["filename"].str.contains("differential")
+    ]
+
+    # Add differential analysis method
+    metadata["differential_analysis_method"] = metadata["filename"].apply(
+        get_differential_analysis_method
     )
 
     # Assign taxonomy id
@@ -152,12 +170,34 @@ def get_info():
         )
     )
 
+    # Complete URL
+    metadata["url"] = "https://osdr.nasa.gov" + metadata["url"]
+
     # Sort by identifier
     metadata = metadata.sort_values(
         by="identifier", key=lambda col: col.str.extract(r"-(\d+)$")[0].astype(int)
     ).reset_index(drop=True)
 
-    return metadata
+    # Return selected columns
+    metadata = metadata[
+        [
+            "identifier",
+            "technology",
+            "measurement",
+            "assay_name",
+            "taxonomy",
+            "material",
+            "host_organism",
+            "host_strain",
+            "filename",
+            "url",
+            "differential_analysis_method",
+            "file.category",
+            "file.subcategory",
+        ]
+    ]
+
+    return metadata.drop_duplicates()
 
 
 def filter_by_gl_processed(metadata):
@@ -187,48 +227,15 @@ def filter_by_gl_processed(metadata):
         }
     )
 
-    return metadata[
+    metdata = metadata[
         (metadata["file.GL-processed"] != False)
         | (metadata["file.non-GL-processed"] != False)
-    ].copy()
+    ]
 
+    # These columns are not needed anymore
+    metadata = metadata.drop(columns=["file.GL-processed", "file.non-GL-processed"])
 
-def filter_by_assay_type(metadata):
-    """
-    Filter out records where assay_name contains '-upx' substrings.
-
-    Parameters:
-    -----------
-    metadata : pd.DataFrame
-        DataFrame containing an 'assay_name' column
-
-    Returns:
-    --------
-    pd.DataFrame
-        Filtered DataFrame excluding records with '-upx' in assay_name
-    """
-    metadata["assay_name"] = (
-        metadata["assay_name"]
-        .fillna("")
-        .apply(
-            lambda s: (s if not re.search(r"-upx", s, flags=re.IGNORECASE) else False)
-        )
-        # .apply(lambda s: (s if not re.search(r"-upx|-mrna", s, flags=re.IGNORECASE) else False))
-    )
-
-    metadata = metadata.drop_duplicates()
-
-    return metadata[metadata["assay_name"] != False].copy()
-
-
-def add_sample_counts(metadata):
-    per_sample_counts = (
-        metadata.drop(columns="id.sample name").value_counts().reset_index()
-    )
-    per_sample_counts.insert(
-        2, "id.sample count", per_sample_counts.pop("count")
-    )  # just moving it from the last position to where it belongs
-    return per_sample_counts.sort_values(by=["identifier", "assay_name"])
+    return metadata
 
 
 def filter_by_technology_type(metadata, technology_types):
@@ -243,7 +250,7 @@ def filter_by_host_organism(metadata, taxids):
     metadata = metadata[
         (metadata["host_organism"] == "") | (metadata["host_organism"].isin(inv_taxids))
     ].copy()
-    metadata["host_taxonomy"] = metadata["host_organism"].map(inv_taxids)
+    metadata["host_taxonomy"] = metadata["host_organism"].map(inv_taxids).fillna("")
     return metadata
 
 
@@ -261,55 +268,44 @@ def download_data_files(assays, file_types, filters, reset=False):
 
     file_list = []
 
+    assays = select_differential_expression_file(assays)
+
     for _, row in assays.iterrows():
         identifier = row["identifier"]
         technology = row["technology"]
+        filename = row["filename"]
+        url = row["url"]
 
         file_type = file_types.get(technology, None)
         filter_func = filters.get(file_type, None)
 
         if file_type:
-            url = os.path.join(DATASET_URL, identifier, "files")
-
             try:
-                response = requests.get(url, allow_redirects=True, timeout=10)
-                response.raise_for_status()
+                success = download_data_file(url, filename, filter_func, DATASET_PATH)
+                time.sleep(0.1)
+                if not success:
+                    continue
 
-                # Get filename and URL for each dataset and download it
-                datafile_info = get_file_info(response.json(), file_type)
-                print(identifier, ": ", datafile_info)
-                for info in datafile_info:
-                    filename = info["filename"]
-                    file_url = info["url"]
-
-                    success = download_data_file(
-                        file_url, filename, filter_func, DATASET_PATH
-                    )
-                    time.sleep(0.1)
-                    if not success:
-                        continue
-
-                    # Save info about the downloaded file
-                    file_info = row.copy()
-                    file_info["filename"] = filename
-                    file_info["url"] = file_url
-                    file_info["differential_analysis_method"] = info[
-                        "differential_analysis_method"
-                    ]
-                    file_list.append(file_info)
+                # Save info about the downloaded file
+                file_info = row.copy()
+                file_list.append(file_info)
 
             except requests.exceptions.RequestException as e:
                 print(f"Error fetching {url}: {str(e)}")
 
     df = pd.DataFrame(file_list)
     df.drop_duplicates(inplace=True)
-    df = select_differential_expression_file(df)
 
     return df
 
 
 def select_differential_expression_file(df):
     """Select the preferred differential expression file"""
+
+    # Skip the following types of differential expression files
+    skip_terms = ("ERCCnorm", "rRNArm", "UPX")
+    df = df[~df["filename"].str.contains("|".join(skip_terms))]
+
     gl_suffix = "differential_expression_GLbulkRNAseq.csv"
     plain_suffix = "differential_expression.csv"
 
@@ -325,32 +321,6 @@ def select_differential_expression_file(df):
     return df
 
 
-def get_file_info(data, file_type):
-    rows = []
-
-    for identifier, content in data.items():
-        files = content.get("files", {})
-        for file_name, file_details in files.items():
-            # Skip the following types of differential expression files
-            # skip_terms = ("ERCCnorm", "rRNArm", "UPX")
-            skip_terms = ("ERCCnorm", "rRNArm", "UPX")
-            if any(term in file_name for term in skip_terms):
-                continue
-
-            if file_type in file_name:
-                rows.append(
-                    {
-                        "identifier": identifier,
-                        "filename": file_name,
-                        "url": file_details.get("URL"),
-                        "differential_analysis_method": get_differential_analysis_method(
-                            file_name
-                        ),
-                    }
-                )
-    return rows
-
-
 def get_differential_analysis_method(file_name):
     if "ancombc1" in file_name:
         return "ANCOMB-BC"
@@ -362,7 +332,8 @@ def get_differential_analysis_method(file_name):
         return "DESeq2"
     if "differential_methylation" in file_name:
         return "methylKit"
-    return ""
+    # default for transcription profiling
+    return "DESeq2"
 
 
 def download_data_file(url, filename, filter_func, dataset_path):
@@ -767,7 +738,10 @@ def extract_transcription_data(assays: pd.DataFrame, threshold: float) -> pd.Dat
                     group_mean_col2,
                     group_stdev_col2,
                 ]
-            ].dropna()
+            ]
+
+            # Require the following data to be present
+            sub = sub.dropna(subset=["ENTREZID", log2fc_col, adj_col])
 
             # Filter by p‑value threshold
             sub = sub[sub[adj_col] <= threshold]
@@ -798,7 +772,7 @@ def extract_transcription_data(assays: pd.DataFrame, threshold: float) -> pd.Dat
 
     # Concatenate or return empty
     if rows:
-        return pd.concat(rows, ignore_index=True)
+        return pd.concat(rows, ignore_index=True).fillna("")
     return pd.DataFrame(columns=cols)
 
 
@@ -859,7 +833,7 @@ def extract_methylation_data(
             }.issubset(df.columns):
                 continue
 
-            # select & drop NA
+            # select columns
             sub = df[
                 [
                     "ENTREZID",
@@ -877,7 +851,23 @@ def extract_methylation_data(
                     "exon",
                     "intron",
                 ]
-            ].dropna()
+            ]
+
+            # Require the following data to be present
+            sub = sub.dropna(
+                subset=[
+                    "ENTREZID",
+                    diff_col,
+                    qv_col,
+                    "chr",
+                    "start",
+                    "end",
+                    "dist.to.feature",
+                    "prom",
+                    "exon",
+                    "intron",
+                ]
+            )
 
             # filter by q‑value threshold
             sub = sub[sub[qv_col] <= threshold]
@@ -921,7 +911,7 @@ def extract_methylation_data(
 
     # concatenate or return empty frame with proper columns
     if rows:
-        return pd.concat(rows, ignore_index=True)
+        return pd.concat(rows, ignore_index=True).fillna("")
     return pd.DataFrame(columns=cols)
 
 
@@ -983,7 +973,17 @@ def extract_amplicon_deseq2_data(
                     group_mean_col2,
                     group_stdev_col2,
                 ]
-            ].dropna()
+            ]
+
+            # Require the following data to be present
+            sub = sub.dropna(
+                subset=[
+                    "NCBI_id",
+                    "best_taxonomy",
+                    log2fc_col,
+                    adj_col,
+                ]
+            )
 
             # Filter by p‑value threshold
             sub = sub[sub[adj_col] <= threshold]
@@ -1015,7 +1015,7 @@ def extract_amplicon_deseq2_data(
 
     # Concatenate or return empty
     if rows:
-        return pd.concat(rows, ignore_index=True)
+        return pd.concat(rows, ignore_index=True).fillna("")
     return pd.DataFrame(columns=cols)
 
 
@@ -1048,6 +1048,7 @@ def extract_amplicon_ancombc_data(
         & (assays["differential_analysis_method"].isin(["ANCOMB-BC", "ANCOMB-BC2"]))
     ]
     for filename, grp in tp.groupby("filename"):
+        print("ANCOMB-BC:", filename)
         # Print study_id when loading a new file
         print(f"processing: {grp['study_id'].iat[0]}")
         df = pd.read_csv(os.path.join(DATASET_PATH, filename), low_memory=False)
@@ -1078,8 +1079,17 @@ def extract_amplicon_ancombc_data(
                     group_mean_col2,
                     group_stdev_col2,
                 ]
-            ].dropna()
+            ]
 
+            # Require the following data to be present
+            sub = sub.dropna(
+                subset=[
+                    "NCBI_id",
+                    "best_taxonomy",
+                    lnfc_col,
+                    qvalue_col,
+                ]
+            )
             # Filter by q‑value threshold
             sub = sub[sub[qvalue_col] <= threshold]
             if sub.empty:
@@ -1113,7 +1123,7 @@ def extract_amplicon_ancombc_data(
     # Concatenate or return empty
     if rows:
         #        return pd.concat(rows, ignore_index=True)
-        df = pd.concat(rows, ignore_index=True)
+        df = pd.concat(rows, ignore_index=True).fillna("")
 
         return df
     return pd.DataFrame(columns=cols)

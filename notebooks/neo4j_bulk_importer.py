@@ -195,8 +195,9 @@ def run_bulk_import(verbose=False):
     # run import
     neo4j_admin = quote_path(os.path.join(NEO4J_BIN, "neo4j-admin"))
     NEO4J_IMPORT = quote_path(NEO4J_IMPORT)
-    #    command = f"cd {NEO4J_IMPORT}; {neo4j_admin} database import full {NEO4J_DATABASE} --overwrite-destination --skip-bad-relationships --skip-duplicate-nodes --array-delimiter='|' @args.txt"
-    command = f"export NEO4J_ADMIN_JAVA_OPTS='{NEO4J_ADMIN_JAVA_OPTS}'; cd {NEO4J_IMPORT}; {neo4j_admin} database import full {NEO4J_DATABASE} --overwrite-destination --skip-bad-relationships --skip-duplicate-nodes --array-delimiter='|' @args.txt"
+#     command = f"export NEO4J_ADMIN_JAVA_OPTS='{NEO4J_ADMIN_JAVA_OPTS}'; cd {NEO4J_IMPORT}; {neo4j_admin} database import full {NEO4J_DATABASE} --overwrite-destination --skip-bad-relationships --skip-duplicate-nodes --array-delimiter='|' @args.txt"
+    command = f"export NEO4J_ADMIN_JAVA_OPTS='{NEO4J_ADMIN_JAVA_OPTS}'; cd {NEO4J_IMPORT}; {neo4j_admin} database import full {NEO4J_DATABASE} --overwrite-destination --skip-bad-relationships --skip-duplicate-nodes --max-off-heap-memory=8g --array-delimiter='|' @args.txt"
+
     if verbose:
         print(f"run_bulk_import: {command}", flush=True)
 

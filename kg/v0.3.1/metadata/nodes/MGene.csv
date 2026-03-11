@@ -1,0 +1,6 @@
+property,type,description,example
+identifier,string,Gene ENTREZID for model organism,14679
+symbol,string,Gene symbol for model organism,Gnai3
+name,string,Gene name for model organism,Guanine nucleotide-binding protein G(i) subunit alpha-3
+organism,string,NCBI scientifc name for the model organism,Mus musculus
+taxonomy,string,NCBI taxonomy id for the model organism,10090

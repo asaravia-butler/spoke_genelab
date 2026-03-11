@@ -1,0 +1,3 @@
+property,type,description,example
+identifier,string,NCBI taxonomy ID,286
+name,string,NCBI scientific organism name,Pseudomonas
