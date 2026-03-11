@@ -323,9 +323,9 @@ def select_differential_expression_file(df):
 
 def get_differential_analysis_method(file_name):
     if "ancombc1" in file_name:
-        return "ANCOMB-BC"
+        return "ANCOM-BC"
     if "ancombc2" in file_name:
-        return "ANCOMB-BC2"
+        return "ANCOM-BC2"
     if "deseq2" in file_name:
         return "DESeq2"
     if "differential_expression" in file_name:
@@ -1042,13 +1042,13 @@ def extract_amplicon_ancombc_data(
         "group_stdev_2",
     ]
 
-    # Filter ANCOMB-BC data and group by filename
+    # Filter ANCOM-BC data and group by filename
     tp = assays[
         (assays["measurement"] == "Amplicon Sequencing")
-        & (assays["differential_analysis_method"].isin(["ANCOMB-BC", "ANCOMB-BC2"]))
+        & (assays["differential_analysis_method"].isin(["ANCOM-BC", "ANCOM-BC2"]))
     ]
     for filename, grp in tp.groupby("filename"):
-        print("ANCOMB-BC:", filename)
+        print("ANCOM-BC:", filename)
         # Print study_id when loading a new file
         print(f"processing: {grp['study_id'].iat[0]}")
         df = pd.read_csv(os.path.join(DATASET_PATH, filename), low_memory=False)
