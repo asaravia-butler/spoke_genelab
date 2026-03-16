@@ -1,0 +1,14 @@
+property,type,description,example
+identifier,string,Unique assay identifier combining GeneLab dataset accession and MD5 hash of metadata (links assay to dataset and ensures version integrity),OSD-401-ec55d3e698d289f2afd663725127
+name,string,Human-readable assay title detailing the biological measurement performed,transcription profiling – RNA Sequencing (RNA‑Seq)
+technology,string,"Technology type from API endpoint investigation.study assays.study assay technology type (e.g., RNA Sequencing, mass spectrometry, imaging)",RNA Sequencing (RNA-Seq)
+measurement,string,"Measurement type from API endpoint investigation.study assays.study assay measurement type, serving as a higher-level categorization of the technology type",transcription profiling
+assay_name,string,Full OSDR assay name from id.assay name,a_OSD-48_transcription-profiling_rna-sequencing
+num_samples,int,Number of samples in this assay,24
+platform,string,Sequencing or array platform from assay.parameter value.sequencing platform or array design ref,Illumina HiSeq 4000
+library_strategy,string,Library strategy from assay.parameter value.library strategy,AMPLICON
+library_layout,string,Single-end or paired-end from assay.parameter value.library layout,PAIRED
+sequencing_instrument,string,Instrument model from assay.parameter value.sequencing instrument,Illumina HiSeq 2000
+library_kit,string,Library preparation kit from assay.parameter value.library kit,Illumina TruSeq RNA Sample Preparation Kit
+library_selection,string,Library selection method from assay.parameter value.library selection,ribo-depletion
+has_genelab_processed,boolean,Whether GeneLab processed data exists for this assay based on file.category,true

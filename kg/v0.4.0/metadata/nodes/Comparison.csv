@@ -1,0 +1,14 @@
+property,type,description,example
+identifier,string,Composite key: {assay_id}:{group1_id}_vs_{group2_id},OSD-48-abc123:(SF)v(GC)
+name,string,"Human-readable contrast label derived from factor columns in data files (e.g., (Space Flight)v(Ground Control))",(Space Flight)v(Ground Control)
+differential_analysis_method,string,"The statistical method used to test for differential signal between conditions (e.g., DESeq2, ANCOM-BC, methylKit). Moved from Assay node.",DESeq2
+factor_space_1,string,"Primary spaceflight factor for test group, indicating whether it was exposed to Space Flight or other conditions. Moved from Assay node.",Space Flight
+factor_space_2,string,"Primary spaceflight factor for reference group, indicating whether it was maintained under control conditions. Moved from Assay node.",Ground Control
+factors_1,string[],"All factor values for test group (independent variables intentionally varied by the investigator). Moved from Assay node.",Space Flight
+factors_2,string[],"All factor values for reference group, typically the comparative or control group(s). Moved from Assay node.",Ground Control
+material_1,string,"Biological material analyzed in the test group (e.g., tissue, cell type, organ). Moved from Assay node.",Quadriceps femoris
+material_2,string,"Biological material analyzed in the reference group (e.g., tissue, cell type, organ). Moved from Assay node.",Gastrocnemius
+material_name_1,string,"Preferred ontology-based name for the test group material (e.g., UBERON term). Moved from Assay node.",Quadriceps femoris
+material_name_2,string,"Preferred ontology-based name for the reference group material (e.g., UBERON term). Moved from Assay node.",Gastrocnemius
+material_id_1,string,"Controlled ontology identifier for the test group material (e.g., UBERON code). Moved from Assay node.",UBERON:0001377
+material_id_2,string,"Controlled ontology identifier for the reference group material (e.g., UBERON code). Moved from Assay node.",UBERON:0001388

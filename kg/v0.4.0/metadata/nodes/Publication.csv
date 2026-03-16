@@ -1,0 +1,4 @@
+property,type,description,example
+identifier,string,DOI of the publication from investigation.study.comment.doi,10.25966/t6db-f633
+doi,string,Digital Object Identifier from investigation.study.comment.doi,10.25966/t6db-f633
+author_list,string[],List of authors from dataset.study publication author list,Taylor Katherine|Kleinhesselink Kurt|George Michael D.

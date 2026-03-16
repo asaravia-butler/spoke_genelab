@@ -1,0 +1,3 @@
+property,type,description,example
+from,string,Composite key: {accession}:{source_name},OSD-48:FL_LAR_10
+to,string,NCBI taxonomy ID,10090

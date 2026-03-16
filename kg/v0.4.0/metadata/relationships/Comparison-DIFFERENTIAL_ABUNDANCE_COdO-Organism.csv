@@ -1,0 +1,11 @@
+property,type,description,example
+from,string,Composite key: {assay_id}:{group1_id}_vs_{group2_id},OSD-48-abc123:(SF)v(GC)
+to,string,NCBI taxonomy ID,286
+log2fc,float,"Log2-transformed fold change in organism or taxon abundance between the test group and reference group. Positive values indicate increased abundance, while negative values denote decreased abundance relative to the reference group.",-0.145485596
+adj_p_value,float,"Multiple testing-corrected p-value assessing the statistical significance of each taxon's differential abundance after controlling the false-discovery rate (FDR).",0.016441347
+lnfc,float,"Ln-transformed fold change in organism or taxon abundance between the test group and reference group. Positive values indicate increased abundance, while negative values denote decreased abundance relative to the reference group.",-0.145485596
+q_value,float,Adjusted p-value to control for false discovery rate,0.0463
+group_mean_1,float,Group mean for test sample group,0.5
+group_stdev_1,float,Group stdev for test sample group,0.5
+group_mean_2,float,Group mean for reference sample group,0.5
+group_stdev_2,float,Group stdev for reference sample group,0.5

@@ -1,0 +1,3 @@
+property,type,description,example
+from,string,Unique assay identifier combining GeneLab dataset accession and MD5 hash of metadata,OSD-401-ec55d3e698d289f2afd663725127
+to,string,Composite key: {accession}:{filename},OSD-48:GLDS-48_rna_seq_DESeq2_DGE.csv

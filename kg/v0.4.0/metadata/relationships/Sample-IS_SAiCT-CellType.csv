@@ -1,0 +1,3 @@
+property,type,description,example
+from,string,Composite key: {accession}:{sample_name},OSD-48:Mmus_C57-6J_LVR_GC_I_Rep1_M31
+to,string,Cell Ontology ID,CL:0010017

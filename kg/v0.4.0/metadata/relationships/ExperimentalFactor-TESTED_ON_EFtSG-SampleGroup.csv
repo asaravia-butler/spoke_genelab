@@ -1,0 +1,3 @@
+property,type,description,example
+from,string,Composite key: {factor_name}:{normalized_value},spaceflight:Space Flight
+to,string,Composite key: {accession}:{hash_of_factor_values},OSD-48:a3f8c1

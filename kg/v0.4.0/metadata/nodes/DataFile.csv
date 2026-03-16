@@ -1,0 +1,8 @@
+property,type,description,example
+identifier,string,Composite key: {accession}:{filename},OSD-48:GLDS-48_rna_seq_DESeq2_DGE.csv
+filename,string,Name of the data file from the OSDR file API,GLDS-48_rna_seq_Unnormalized_Counts.csv
+url,string,Download URL from the OSDR file API,https://osdr.nasa.gov/bio/repo/data/studies/OSD-48/...
+data_type,string,"Type of data (e.g., differential expression, raw counts, alignment)",differential expression
+category,string,"High-level category from file.category (e.g., GeneLab Processed, Study Submitted)",GeneLab Processed
+subcategory,string,"Subcategory from file.subcategory (e.g., Differential gene expression analysis, STAR Alignment)",Differential gene expression analysis
+format,string,"File format derived from filename (e.g., csv, fastq.gz, bam, txt)",csv

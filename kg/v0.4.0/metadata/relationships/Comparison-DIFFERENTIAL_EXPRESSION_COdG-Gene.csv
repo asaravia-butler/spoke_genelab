@@ -1,0 +1,9 @@
+property,type,description,example
+from,string,Composite key: {assay_id}:{group1_id}_vs_{group2_id},OSD-48-abc123:(SF)v(GC)
+to,string,Gene ENTREZID,14679
+log2fc,float,"Log2-transformed fold change in gene expression between the test group and reference group. Positive values indicate up-regulation (higher transcript abundance), while negative values denote down-regulation relative to the reference group.",-0.145485596
+adj_p_value,float,"Multiple testing-corrected p-value assessing the statistical significance of each gene's differential expression after controlling the false-discovery rate (FDR). Smaller values (e.g., <= 0.05) indicate that the observed log2 fold change is unlikely to arise by chance.",0.016441347
+group_mean_1,float,Group mean for test sample group,0.5
+group_stdev_1,float,Group stdev for test sample group,0.5
+group_mean_2,float,Group mean for reference sample group,0.5
+group_stdev_2,float,Group stdev for reference sample group,0.5

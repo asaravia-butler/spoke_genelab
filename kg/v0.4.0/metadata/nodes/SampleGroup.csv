@@ -1,0 +1,6 @@
+property,type,description,example
+identifier,string,Composite key: {accession}:{hash_of_factor_values} derived from unique factor combinations,OSD-48:a3f8c1
+name,string,"Human-readable group label derived from factor values (e.g., Space Flight & Upon euthanasia)",Space Flight & Upon euthanasia
+study_id,string,Parent study accession,OSD-48
+factor_values,string[],List of factor name=value pairs from study.factor value.* columns,spaceflight=Space Flight|dissection condition=Upon euthanasia
+sample_count,int,Number of samples in this group,5

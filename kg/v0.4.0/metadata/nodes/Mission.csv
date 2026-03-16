@@ -1,0 +1,10 @@
+property,type,description,example
+identifier,string,Identifier for mission,SpaceX-4
+name,string,Name of the mission,SpaceX-4
+flight_program,string,Type of flight program,International Space Station (ISS)
+space_program,string,Sponsor of the mission,NASA
+start_date,date,Start date of mission,2014-09-21
+end_date,date,End date of mission,2014-10-25
+mission_name,string,Mission name from OSDR API (investigation.study.comment.Mission Name),SpaceX-4
+duration_days,int,Duration of mission in days computed from start and end date,34
+destination,string,"Destination of the mission (e.g., ISS, LEO, Lunar) derived from flight_program",ISS

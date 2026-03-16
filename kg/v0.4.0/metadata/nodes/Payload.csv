@@ -1,0 +1,4 @@
+property,type,description,example
+identifier,string,Project/payload identifier from investigation.study.comment.project identifier,RR-1
+name,string,Payload/project name,RR-1
+project_type,string,"Type of project (e.g., Spaceflight Study, Ground Study)",Spaceflight Study

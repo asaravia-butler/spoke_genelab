@@ -1,0 +1,24 @@
+property,type,description,example
+identifier,string,Composite key: {accession}:{source_name},OSD-48:FL_LAR_10
+name,string,Source name as provided in OSDR from study.source name,FL_LAR_10
+num_studies,int,Number of OSD studies containing this subject,29
+num_assays,int,Number of unique assays conducted on this subject,39
+shared_subject_id,string,Cross-study subject ID (only set when properties are consistent across studies; null for ambiguous names),FL_LAR_10
+sex,string,Biological sex from study.characteristics.sex,Female
+strain,string,Genetic strain or line from study.characteristics.strain,BALB/cAnNTac
+genotype,string,Genotype description from study.characteristics.genotype,Wild Type
+age,string,Age at relevant timepoint from study.characteristics.age,7 {day}
+developmental_stage,string,Developmental stage from study.characteristics.developmental stage,Adult
+cell_line,string,Cell line identifier if applicable from study.characteristics.cell line,TK-6 cell
+animal_source,string,Vendor or source from study.characteristics.animal source,Taconic Biosciences
+diet,string,Diet description from study.characteristics.diet,Nutrient Upgraded Rodent Food Bar (NuRFB)
+body_mass,string,Body mass from study.characteristics.body mass,70-79 {kilogram}
+individual_identifier,string,Individual identifier within study from study.characteristics.individual identifier,5
+absorbed_radiation_dose,string,Absorbed radiation dose with units from study.parameter value.absorbed radiation dose,2.84 {milligray}
+absorbed_radiation_dose_rate,string,Radiation dose rate from study.parameter value.absorbed radiation dose rate,0.22 {milligray per day}
+ionizing_radiation_source,string,Source of ionizing radiation from study.parameter value.ionizing radiation categorized by source,outer space
+light_cycle,string,Light cycle conditions from study.parameter value.light cycle,24 dark {hour}
+housing_condition,string,Housing conditions from study.parameter value.housing condition,individual housing
+growth_temperature,string,Growth temperature from study.parameter value.growth temperature,37 {degree Celsius}
+habitat,string,Habitat or hardware used from study.parameter value.habitat,Animal enclosure modules (AEM)
+euthanasia_method,string,Method of euthanasia from study.parameter value.euthanasia method,100% CO2

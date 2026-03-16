@@ -1,0 +1,10 @@
+property,type,description,example
+identifier,string,Composite key: {accession}:{sample_name},OSD-48:Mmus_C57-6J_LVR_GC_I_Rep1_M31
+name,string,Sample name as provided in OSDR from id.sample name,Mmus_C57-6J_LVR_GC_I_Rep1_M31
+material_type,string,Type of biological material from study.characteristics.material type,Whole Organism
+organism_part,string,Specific organ or body part from study.characteristics.organism part,cell culture
+biospecimen_type,string,Type of biospecimen from study.characteristics.biospecimen type,Environmental
+preservation_method,string,How sample was preserved from study.parameter value.sample preservation method,RNALater
+storage_temperature,string,Storage temperature from study.parameter value.sample storage temperature,-80 {degree Celsius}
+collection_date,string,Date of sample collection from study.characteristics.collection date,6-May-1999
+replicate,string,Replicate identifier from study.characteristics.replicate or biological replicate,1

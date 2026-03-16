@@ -1,0 +1,4 @@
+property,type,description,example
+from,string,Composite key: {accession}:{hash_of_factor_values} for the sample group,OSD-48:a3f8c1
+to,string,Composite key: {assay_id}:{group1_id}_vs_{group2_id} for the pairwise comparison,OSD-48-abc123:(SF)v(GC)
+role,string,"Role of this sample group in the comparison: test or reference. The test group is the numerator in fold-change calculations (positive log2fc = upregulated in test group). The reference group is the denominator (baseline/control). By default if a group name contains Space Flight it is automatically assigned as test and its counterpart as reference. If both roles are defined the comparison direction is test group vs reference group. For comparisons without a clear test/reference distinction the role may be empty and users can specify directionality in their queries.",test

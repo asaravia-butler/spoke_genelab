@@ -1,0 +1,5 @@
+property,type,description,example
+identifier,string,NCBI taxonomy ID,10090
+name,string,NCBI scientific organism name,Mus musculus
+common_name,string,Common name of organism derived from or looked up via NCBI taxonomy,house mouse
+kingdom,string,Taxonomic kingdom derived from NCBI taxonomy,Animalia

@@ -1,0 +1,151 @@
+node {
+  diameter: 50px;
+  color: #A5ABB6;
+  border-color: #9AA1AC;
+  border-width: 2px;
+  text-color-internal: #FFFFFF;
+  font-size: 10px;
+}
+relationship {
+  color: #A5ABB6;
+  shaft-width: 1px;
+  font-size: 8px;
+  padding: 3px;
+  text-color-external: #000000;
+  text-color-internal: #FFFFFF;
+  caption: "<type>";
+}
+node.Mission {
+  color: #C4A484;
+  border-color: #7F5112;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 50px;
+}
+node.Payload {
+  color: #D4A76A;
+  border-color: #A07840;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 50px;
+}
+node.Study {
+  color: #4C8EDA;
+  border-color: #2870c2;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+}
+node.Subject {
+  color: #6B5B95;
+  border-color: #4A3D6E;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 65px;
+}
+node.Sample {
+  color: #88B04B;
+  border-color: #6A8C3A;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 50px;
+}
+node.Assay {
+  color: #F79767;
+  border-color: #f36924;
+  text-color-internal: #FFFFFF;
+  caption: "{name}";
+  diameter: 80px;
+}
+node.SampleGroup {
+  color: #E8A87C;
+  border-color: #C47A50;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 75px;
+}
+node.Comparison {
+  color: #D5573B;
+  border-color: #A83E28;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 65px;
+}
+node.ExperimentalFactor {
+  color: #92A8D1;
+  border-color: #6A80A9;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{factor_name}";
+  diameter: 65px;
+}
+node.Gene {
+  color: #569480;
+  border-color: #447666;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{symbol}";
+  diameter: 80px;
+}
+node.MethylationRegion {
+  color: #FFC454;
+  border-color: #d7a013;
+  text-color-internal: #2A2C34;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 50px;
+}
+node.Organism {
+  color: #955251;
+  border-color: #6E3A3A;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{name}";
+  diameter: 65px;
+}
+node.Anatomy {
+  color: #F16667;
+  border-color: #eb2728;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{identifier}";
+}
+node.CellType {
+  color: #C990C0;
+  border-color: #b261a5;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{identifier}";
+}
+node.DataFile {
+  color: #B5E7A0;
+  border-color: #82C46A;
+  text-color-internal: #2A2C34;
+  defaultCaption: "<id>";
+  caption: "{filename}";
+  diameter: 50px;
+}
+node.Publication {
+  color: #DEA5A4;
+  border-color: #C07A79;
+  text-color-internal: #FFFFFF;
+  defaultCaption: "<id>";
+  caption: "{doi}";
+  diameter: 50px;
+}
+node.MetaNode {
+  color: #D9C8AE;
+  border-color: #c0a378;
+  text-color-internal: #2A2C34;
+  defaultCaption: "<id>";
+  caption: "{nodeName}";
+}
+relationship.MetaRelationship {
+  caption: "{relationshipName}";
+}

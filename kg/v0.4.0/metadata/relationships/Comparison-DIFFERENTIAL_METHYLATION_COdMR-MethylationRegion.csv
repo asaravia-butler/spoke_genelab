@@ -1,0 +1,9 @@
+property,type,description,example
+from,string,Composite key: {assay_id}:{group1_id}_vs_{group2_id},OSD-48-abc123:(SF)v(GC)
+to,string,Identifier for base pair range,1:155433001-155434000
+methylation_diff,float,Percent change in methylation in base pair range between test group and reference group,-3.542
+q_value,float,Adjusted p-value to control for false discovery rate,0.0463
+group_mean_1,float,Group mean for test sample group,0.5
+group_stdev_1,float,Group stdev for test sample group,0.5
+group_mean_2,float,Group mean for reference sample group,0.5
+group_stdev_2,float,Group stdev for reference sample group,0.5

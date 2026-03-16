@@ -1,0 +1,6 @@
+property,type,description,example
+identifier,string,Gene ENTREZID,14679
+symbol,string,Gene symbol,Ntrk2
+name,string,Gene name,neurotrophic tyrosine kinase receptor type 2
+organism,string,NCBI scientific name for the organism,Mus musculus
+taxonomy,string,NCBI taxonomy ID for the organism,10090

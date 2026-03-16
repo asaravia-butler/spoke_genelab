@@ -1,0 +1,5 @@
+property,type,description,example
+identifier,string,Composite key: {factor_name}:{normalized_value},spaceflight:Space Flight
+factor_name,string,Name of the experimental factor from study.factor value.* column names,spaceflight
+factor_value,string,Value of the factor from study.factor value.* cell values,Space Flight
+factor_category,string,"Category grouping derived from factor_name (e.g., spaceflight, radiation, gravity, treatment)",spaceflight
