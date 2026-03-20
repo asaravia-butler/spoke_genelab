@@ -4,7 +4,7 @@
 
 1. Download the Neo4j dump file
 
-[![Download spoke-genelab-v0.2.0](https://img.shields.io/badge/Download-spoke--genelab--v0.2.0-brightgreen)](https://drive.google.com/file/d/17abOQB6wu0nTbWZoehvfo5V9ZqHhzU-1/view?usp=sharing)
+[![Download spoke-genelab-v0.3.1](https://img.shields.io/badge/Download-spoke--genelab--v0.3.1-brightgreen)](https://drive.google.com/file/d/1Wy-BqUhtmGk7qB8WpnG5LefDDsF_6xQW/view?usp=sharing)
 
 2. Launch Neo4j Desktop and start the `spoke-genelab` instance
 
@@ -18,7 +18,7 @@
   <img src="create_db_menu.png" width="600">
 </p>
 
-3. Enter the exact database name, e.g., spoke-genelab-v0.2.0
+3. Enter the exact database name, e.g., spoke-genelab-v0.3.1
 
 <p align="center">
   <img src="create_db.png" width="400">
