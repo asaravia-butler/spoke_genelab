@@ -6,9 +6,18 @@ Created: 2024-03-05
 """
 
 import io
+import os
 import requests
 import pandas as pd
 
+# HCOP "all species, 16-column" ortholog file (gzipped, tab-separated).
+# HGNC migrated these files off the old EBI FTP path to a Google Storage bucket,
+# so the URL is configurable. Override via the HCOP_URL environment variable
+# (e.g. in ../.env) without editing this file.
+HCOP_URL = os.getenv(
+    "HCOP_URL",
+    "https://storage.googleapis.com/public-download-files/hcop/human_all_hcop_sixteen_column.txt.gz",
+)
 
 def map_orthologs(
     df,
@@ -447,12 +456,29 @@ def get_hgnc_mappings(ortholog_dbs):
         "human_entrez_gene",
         "support",
     ]
-    df = pd.read_csv(
-        "https://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_all_hcop_sixteen_column.txt.gz",
-        dtype=str,
-        usecols=columns,
-        sep="\t",
-    )
+    try:
+        df = pd.read_csv(
+            HCOP_URL,
+            dtype=str,
+            usecols=columns,
+            sep="\t",
+        )
+    except (ValueError, KeyError) as e:
+        # usecols mismatch => the file's header column names changed
+        raise RuntimeError(
+            f"HCOP file loaded from {HCOP_URL} but expected columns {columns} "
+            f"were not all found. HGNC may have renamed columns. "
+            f"Check the header with: curl -s '{HCOP_URL}' | zcat | head -1 . "
+            f"Underlying error: {e}"
+        )
+    except Exception as e:
+        # 404 / network / gzip errors, etc.
+        raise RuntimeError(
+            f"Failed to download the HCOP ortholog file from {HCOP_URL}. "
+            f"HGNC may have moved it again -- find the current 'human, all species, "
+            f"16 column' link at https://www.genenames.org/download/ and set HCOP_URL. "
+            f"Underlying error: {e}"
+        )
 
     # filter mappings by the list of provided ortholog databases
     df["support"] = df["support"].str.split(",")

@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import time
 import shutil
 from pathlib import Path
@@ -21,12 +22,14 @@ def import_from_csv_to_neo4j_community(verbose=False):
 
 def import_from_csv_to_neo4j_desktop(verbose=False):
     setup()
-    drop_database(verbose=verbose)
+    drop_database(verbose=verbose)      # needs DBMS running
+    neo4j_utils.stop()                  # ← add: stop before import
     pm.execute_notebook(
         "PrepareNeo4jBulkImport.ipynb", "PrepareNeo4jBulkImport_out.ipynb"
     )
-    run_bulk_import(verbose=verbose)
-    create_database(verbose=verbose)
+    run_bulk_import(verbose=verbose)    # needs DBMS stopped
+    neo4j_utils.start()                 # ← add: restart
+    create_database(verbose=verbose)    # needs DBMS running
     add_indices(verbose=verbose)
 
 
@@ -128,12 +131,13 @@ def quote_path(path):
 def dump_database(verbose=False):
     NEO4J_DATABASE = os.getenv("NEO4J_DATABASE")
     NEO4J_INSTALL_PATH = os.getenv("NEO4J_INSTALL_PATH")
+    version = os.getenv("KG_VERSION")
     neo4j_dump = os.path.join(NEO4J_INSTALL_PATH, version)
     NEO4J_BIN = os.getenv("NEO4J_BIN")
     neo4j_admin = quote_path(os.path.join(NEO4J_BIN, "neo4j-admin"))
 
     os.makedirs(neo4j_dump, exist_ok=True)
-    neo4j_dump = quote_path(eo4j_dump)
+    neo4j_dump = quote_path(neo4j_dump)
     command = f"{neo4j_admin} database dump {NEO4J_DATABASE} --to-path={neo4j_dump}"
 
     if verbose:
@@ -191,26 +195,42 @@ def run_bulk_import(verbose=False):
     NEO4J_BIN = os.getenv("NEO4J_BIN")
     NEO4J_DATABASE = os.getenv("NEO4J_DATABASE")
     NEO4J_ADMIN_JAVA_OPTS = os.getenv("NEO4J_ADMIN_JAVA_OPTS")
+    JAVA_HOME = os.getenv("JAVA_HOME")
+    if not JAVA_HOME:
+        sys.exit("JAVA_HOME is not set in the .env file")
 
-    # run import
-    neo4j_admin = quote_path(os.path.join(NEO4J_BIN, "neo4j-admin"))
-    NEO4J_IMPORT = quote_path(NEO4J_IMPORT)
-#     command = f"export NEO4J_ADMIN_JAVA_OPTS='{NEO4J_ADMIN_JAVA_OPTS}'; cd {NEO4J_IMPORT}; {neo4j_admin} database import full {NEO4J_DATABASE} --overwrite-destination --skip-bad-relationships --skip-duplicate-nodes --array-delimiter='|' @args.txt"
-    command = f"export NEO4J_ADMIN_JAVA_OPTS='{NEO4J_ADMIN_JAVA_OPTS}'; cd {NEO4J_IMPORT}; {neo4j_admin} database import full {NEO4J_DATABASE} --overwrite-destination --skip-bad-relationships --skip-duplicate-nodes --max-off-heap-memory=8g --array-delimiter='|' @args.txt"
+    with open(os.path.join(NEO4J_IMPORT, "args.json")) as f:
+        file_args = json.load(f)
+
+    cmd = [
+        os.path.join(NEO4J_BIN, "neo4j-admin"),
+        "database", "import", "full", NEO4J_DATABASE,
+        "--overwrite-destination",
+        "--skip-bad-relationships",
+        "--skip-duplicate-nodes",
+        "--max-off-heap-memory=4g",
+        "--array-delimiter=|",
+    ] + file_args
+
+    env = os.environ.copy()
+    if JAVA_HOME:
+        env["JAVA_HOME"] = JAVA_HOME
+        env["PATH"] = f"{JAVA_HOME}/bin:{env['PATH']}"
+    if NEO4J_ADMIN_JAVA_OPTS:
+        env["NEO4J_ADMIN_JAVA_OPTS"] = NEO4J_ADMIN_JAVA_OPTS
 
     if verbose:
-        print(f"run_bulk_import: {command}", flush=True)
+        print("run_bulk_import:", " ".join(cmd), flush=True)
 
     try:
-        ret = subprocess.run(command, capture_output=True, check=True, shell=True)
+        ret = subprocess.run(cmd, capture_output=True, check=True,
+                             cwd=NEO4J_IMPORT, env=env)   # no shell=True
         if verbose:
             print(ret.stdout.decode(), flush=True)
     except subprocess.CalledProcessError as e:
-        print(
-            f"ERROR: run_bulk_import: The import failed for database: {NEO4J_DATABASE}",
-            flush=True,
-        )
-        print(e.output)
+        print(f"ERROR: run_bulk_import: import failed for {NEO4J_DATABASE}", flush=True)
+        print("STDOUT:", e.stdout.decode(errors="replace"))
+        print("STDERR:", e.stderr.decode(errors="replace"))
         raise
 
 
